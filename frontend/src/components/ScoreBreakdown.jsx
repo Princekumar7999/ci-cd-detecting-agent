@@ -67,6 +67,13 @@ export default function ScoreBreakdown({ data }) {
                 <div className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-yellow-300 to-amber-600">
                     {totalScore}
                 </div>
+                {/* Visual Progress Bar */}
+                <div className="w-full bg-slate-700/50 rounded-full h-2.5 mt-4 overflow-hidden">
+                    <div
+                        className="bg-gradient-to-r from-yellow-400 to-amber-600 h-2.5 rounded-full transition-all duration-1000 ease-out"
+                        style={{ width: `${Math.min(100, (totalScore / 120) * 100)}%` }} // Max score approx 110-120
+                    ></div>
+                </div>
             </div>
         </div>
     )

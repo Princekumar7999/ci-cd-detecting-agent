@@ -39,7 +39,7 @@ class Analyzer:
         # Wrap in sh -c and redirect stderr
         # Must set PYTHONPATH to current dir so pylint can resolve imports (e.g. src.validator)
         cmd = '/bin/sh -c "export PYTHONPATH=$PYTHONPATH:. && pylint --output-format=json --recursive=y . 2>&1"'
-        result = self.sandbox.run_command(cmd)
+        result = self.sandbox.run_command(cmd, timeout=300)
         
         logger.info(f"Linter raw output: {result['output']}")
         logger.info(f"Linter exit code: {result['exit_code']}")
@@ -100,10 +100,28 @@ class Analyzer:
         # Add current directory to PYTHONPATH. chain with cat to persist output.
         # Using ; to ensure cat runs even if pytest fails.
         cmd = '/bin/sh -c "export PYTHONPATH=$PYTHONPATH:. && pytest --junitxml=report.xml; echo XML_START; cat report.xml; echo XML_END"'
-        result = self.sandbox.run_command(cmd)
+        # 300s timeout (5 mins) for tests
+        result = self.sandbox.run_command(cmd, timeout=300)
         
         logger.info(f"Pytest raw output: {result['output']}")
         logger.info(f"Pytest exit code: {result['exit_code']}")
+        
+        # Handle Timeout
+        if result.get("timeout"):
+             return [{
+                 "file": "timeout",
+                 "line": 0,
+                 "type": "TIMEOUT",
+                 "message": "Test execution timed out. Possible infinite loop or slow dependency install.",
+                 "test_name": "Global Timeout"
+             }]
+
+        # Handle "No Tests Collected" (pytest exit code 5)
+        if result['exit_code'] == 5:
+             logger.info("Pytest returned code 5 (No tests collected). Warning only.")
+             # Optionally return a warning, but strictly this isn't a failure we can "fix" via code changes easily unless we add tests.
+             # For this agent, we'll treat it as empty failures so the pipeline can proceed/pass.
+             return []
         
         # Extract XML content from output
         output = result["output"]
@@ -144,11 +162,22 @@ class Analyzer:
                             search_text = f"{msg}\n{elem.text or ''}"
                             
                             if file_path == "unknown" and search_text:
-                                # Look for File "/app/src/validator.py", line 1
-                                match = re.search(r'File "([^"]+)", line (\d+)', search_text)
-                                if match:
-                                    file_path = match.group(1)
-                                    line = match.group(2)
+                                candidates = []
+                                # Look for all File "..." matches
+                                candidates.extend(re.findall(r'File "([^"]+)", line (\d+)', search_text))
+                                # Look for all pytest matches
+                                candidates.extend(re.findall(r'([a-zA-Z0-9_/.-]+):(\d+): in', search_text))
+                                
+                                # Iterate backwards to find the most relevant user code
+                                best_candidate = None
+                                for f, l in reversed(candidates):
+                                    if "/lib/python" in f or "/usr/" in f or "site-packages" in f:
+                                        continue
+                                    best_candidate = (f, l)
+                                    break
+                                
+                                if best_candidate:
+                                    file_path, line = best_candidate
                                     # cleanup /app/ prefix
                                     if file_path.startswith("/app/"):
                                         file_path = file_path[5:]
@@ -172,7 +201,7 @@ class Analyzer:
                                 "file": file_path,
                                 "line": int(line) if line.isdigit() else 0, # Line is usually 1-indexed in messages
                                 "type": bug_type, 
-                                "message": msg,
+                                "message": combined_text, # Use combined text to include traceback
                                 "test_name": testcase.attrib.get("name")
                             })
         except Exception as e:

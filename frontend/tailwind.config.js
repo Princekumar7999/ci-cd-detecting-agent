@@ -11,6 +11,9 @@ export default {
         'brand-primary': '#3b82f6',
         'success': '#22c55e',
         'error': '#ef4444',
+        slate: {
+          950: '#020617',
+        }
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],

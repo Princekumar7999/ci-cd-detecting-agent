@@ -15,7 +15,7 @@ function App() {
     if (runId && (isLoading || (data && data.status === 'running'))) {
       interval = setInterval(async () => {
         try {
-          const res = await fetch(`http://localhost:8000/results/${runId}`)
+          const res = await fetch(`http://localhost:8001/results/${runId}`)
           if (!res.ok) return;
           const json = await res.json()
           setData(json)
@@ -36,7 +36,7 @@ function App() {
     setIsLoading(true)
     setData(null)
     try {
-      const res = await fetch('http://localhost:8000/analyze', {
+      const res = await fetch('http://localhost:8001/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ repo_url: repoUrl, team_name: teamName, leader_name: leaderName })
@@ -44,7 +44,7 @@ function App() {
       const json = await res.json()
       setRunId(json.run_id)
       // Poll immediately once
-      const res2 = await fetch(`http://localhost:8000/results/${json.run_id}`)
+      const res2 = await fetch(`http://localhost:8001/results/${json.run_id}`)
       if (res2.ok) setData(await res2.json())
     } catch (e) {
       setIsLoading(false)
@@ -64,31 +64,31 @@ function App() {
 
       {/* Input Section */}
       {!runId && (
-        <div className="max-w-xl mx-auto card space-y-6">
-          <div className="space-y-2">
-            <label className="text-slate-300 text-sm font-medium">GitHub Repository URL</label>
+        <div className="max-w-xl mx-auto glass-card p-8 space-y-8">
+          <div className="space-y-3">
+            <label className="text-slate-300 text-sm font-semibold tracking-wide uppercase">GitHub Repository URL</label>
             <input
-              className="input-field"
+              className="w-full bg-slate-950/50 border border-slate-700 rounded-lg px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               placeholder="https://github.com/user/repo"
               value={repoUrl}
               onChange={e => setRepoUrl(e.target.value)}
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-slate-300 text-sm font-medium">Team Name</label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-3">
+              <label className="text-slate-300 text-sm font-semibold tracking-wide uppercase">Team Name</label>
               <input
-                className="input-field"
+                className="w-full bg-slate-950/50 border border-slate-700 rounded-lg px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                 placeholder="e.g. RIFT ORGANISERS"
                 value={teamName}
                 onChange={e => setTeamName(e.target.value)}
               />
             </div>
-            <div className="space-y-2">
-              <label className="text-slate-300 text-sm font-medium">Team Leader Name</label>
+            <div className="space-y-3">
+              <label className="text-slate-300 text-sm font-semibold tracking-wide uppercase">Team Leader</label>
               <input
-                className="input-field"
+                className="w-full bg-slate-950/50 border border-slate-700 rounded-lg px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                 placeholder="e.g. Saiyam Kumar"
                 value={leaderName}
                 onChange={e => setLeaderName(e.target.value)}
@@ -98,8 +98,8 @@ function App() {
 
           <button
             onClick={handleRun}
-            disabled={!repoUrl || !teamName || !leaderName || isLoading}
-            className="btn-primary w-full flex justify-center items-center"
+            disabled={!repoUrl || !teamName || !leaderName || isLoading || runId}
+            className="w-full bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 text-white font-bold py-4 rounded-xl shadow-lg transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center"
           >
             {isLoading ? (
               <>
@@ -109,7 +109,7 @@ function App() {
                 </svg>
                 Initializing Agent...
               </>
-            ) : "Run Agent"}
+            ) : "🚀 Run Agent"}
           </button>
         </div>
       )}

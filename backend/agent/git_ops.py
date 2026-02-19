@@ -52,7 +52,7 @@ class GitOps:
         import time
         for i in range(max_retries):
             try:
-                self.repo.git.push("--set-upstream", "origin", self.branch_name)
+                self.repo.git.push("--force", "--set-upstream", "origin", self.branch_name)
                 print("Push successful.")
                 return
             except git.GitCommandError as e:
