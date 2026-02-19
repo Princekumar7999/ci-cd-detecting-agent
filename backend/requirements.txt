@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+pydantic
+gitpython
+pytest
+pylint
+docker
+requests
+langgraph
+langchain
+langchain_google_genai
