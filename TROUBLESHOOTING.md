@@ -1,26 +1,20 @@
-# Railway Troubleshooting: Finding the Build Settings
+# Railway Troubleshooting Guide
 
-If you cannot find the "Build" section, you are likely in the **Project Settings** instead of the **Service Settings**.
+## 🚨 Crash Solution (Runtime)
+If you see `ModuleNotFoundError: No module named 'langchain.prompts'`, I have already fixed this in the code. **Just redeploy.**
 
-## 1. Click the Service Logic (The Card) ⬜️
-*   Do NOT click the "Settings" button in the top right of the screen.
-*   Look at the main canvas (the graph view).
-*   You will see a **square card** representing your repository/service.
-*   **Click that card**.
+## 🏗️ Build Failure: "COPY requirements.txt . not found"
+If you see this error, Railway is looking at the wrong Dockerfile.
 
-## 2. Now Click Settings ⚙️
-*   Once the card is open/selected, you will see a specific menu for **that service**.
-*   Click the **Settings** tab *inside* that service view.
+### The Fix:
+1.  Go to **Service Settings** -> **Build**.
+2.  **Dockerfile Path**: Change this to `Dockerfile`.
+    *   **INCORRECT**: `backend/Dockerfile`
+    *   **CORRECT**: `Dockerfile` (or just leave it empty if it defaults to root)
+3.  **Root Directory**: Should be `/` (or empty), NOT `backend`.
 
-## 3. Scroll Down to "Build" 🏗️
-*   Now scroll down. You should see "Service", "Networking", and then **Build**.
-*   There you will find **Root Directory** and **Builder**.
+**Why?**
+I created a special `Dockerfile` in the *root* of your repo that handles everything correctly. You must tell Railway to use *that* one, not the one inside the backend folder.
 
----
-
-## Alternative: Auto-Config (Try this first!)
-
-I have added a `railway.toml` file to your backend. This might force Railway to use the Dockerfile automatically.
-
-1.  **Push the latest changes** (including `backend/railway.toml`).
-2.  Railway might redeploy automatically. Check if the error persists.
+## 🔄 Infinite Restart Loop?
+1.  **Clear Start Command**: Go to **Service Settings** -> **Deploy** -> **Start Command** and delete everything.
