@@ -13,9 +13,10 @@ function App() {
   useEffect(() => {
     let interval;
     if (runId && (isLoading || (data && data.status === 'running'))) {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8001';
       interval = setInterval(async () => {
         try {
-          const res = await fetch(`http://localhost:8001/results/${runId}`)
+          const res = await fetch(`${API_URL}/results/${runId}`)
           if (!res.ok) return;
           const json = await res.json()
           setData(json)
@@ -35,8 +36,9 @@ function App() {
 
     setIsLoading(true)
     setData(null)
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8001';
     try {
-      const res = await fetch('http://localhost:8001/analyze', {
+      const res = await fetch(`${API_URL}/analyze`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ repo_url: repoUrl, team_name: teamName, leader_name: leaderName })
@@ -44,7 +46,7 @@ function App() {
       const json = await res.json()
       setRunId(json.run_id)
       // Poll immediately once
-      const res2 = await fetch(`http://localhost:8001/results/${json.run_id}`)
+      const res2 = await fetch(`${API_URL}/results/${json.run_id}`)
       if (res2.ok) setData(await res2.json())
     } catch (e) {
       setIsLoading(false)
