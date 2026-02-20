@@ -6,7 +6,10 @@ import logging
 import os
 import shutil
 # Import Agent Core
-from backend.agent.core import build_agent_graph, AgentState
+try:
+    from backend.agent.core import build_agent_graph, AgentState
+except ImportError:
+    from agent.core import build_agent_graph, AgentState
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
