@@ -25,8 +25,8 @@ git push origin main
     *   Click on the newly created service card.
     *   Go to **Settings**.
     *   **Root Directory**: Set this to `backend` (Important!).
-    *   **Build Command**: Railway should auto-detect from `requirements.txt`.
-    *   **Start Command**: `uvicorn main:app --host 0.0.0.0 --port $PORT` (Auto-detected from `Procfile` if correct, else verify).
+    *   **Builder**: Ensure this is set to **Dockerfile** (Click on the service -> Settings -> Build -> Builder). If it says "Nixpacks" or "Heroku", change it to "Dockerfile".
+    *   **Start Command**: (Leave empty, Dockerfile handles it).
 5.  **Environment Variables**:
     *   Go to **Variables**.
     *   Add `GOOGLE_API_KEY` with your API key.
