@@ -5,15 +5,9 @@
 ![React](https://img.shields.io/badge/frontend-React-blue)
 ![Python](https://img.shields.io/badge/backend-FastAPI-green)
 
-An autonomous AI agent that detects, fixes, and verifies code issues in CI/CD pipelines. Built for the **RIFT 2026 Hackathon** (AI/ML Track).
-
+An autonomous AI agent that detects, fixes, and verifies code issues in CI/CD pipelines. 
 ---
 
-## 🚀 Live Demo & Links
-
-- **Live Application**: [INSERT_YOUR_DEPLOYED_URL_HERE] (e.g., Vercel/Netlify link)
-- **Demo Video**: [INSERT_LINKEDIN_VIDEO_URL_HERE] (Must tag @RIFT2026)
-- **Repository**: [INSERT_GITHUB_REPO_URL_HERE]
 
 ---
 
@@ -106,10 +100,4 @@ The agent can currently detect and fix:
 -   **LLM Rate Limits**: Heavy usage may hit Gemini API rate limits (retry logic is implemented).
 -   **Complex Logic**: Deep architectural bugs may require human intervention.
 
-## 👥 Team
 
-**Team Name**: [INSERT_TEAM_NAME]
-**Team Leader**: [INSERT_LEADER_NAME]
-
--   Member 1: [Name]
--   Member 2: [Name]
