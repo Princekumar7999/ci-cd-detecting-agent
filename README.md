@@ -11,8 +11,8 @@ graph TD
     User[User via React Dashboard] -->|Repo URL + Team Info| API[FastAPI Backend]
     API -->|Trigger| Agent[DevOps Agent Graph]
     
-    subgraph "Agent Workflow (Sandboxed)"
-        Clone[Clone Repo] --> Analysis[Analyze Code (Lint/Test)]
+    subgraph "Agent Workflow - Sandboxed"
+        Clone[Clone Repo] --> Analysis[Analyze Code - Lint/Test]
         Analysis -->|Failures Detected| Fixer[AI Fixer Agent]
         Fixer -->|Generate Fix| Applier[Apply Fix & Commit]
         Applier -->|Push Branch| Remote[GitHub Repo]
@@ -20,6 +20,7 @@ graph TD
     end
     
     Agent -->|Stream Status| Dashboard[React Dashboard]
+```
 
 
 Features
