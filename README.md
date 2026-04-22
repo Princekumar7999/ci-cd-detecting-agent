@@ -1,19 +1,10 @@
-# Autonomous DevOps Agent (RIFT 2026 Hackathon)
+# Autonomous DevOps Agent
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Status](https://img.shields.io/badge/status-active-success.svg)
-![React](https://img.shields.io/badge/frontend-React-blue)
-![Python](https://img.shields.io/badge/backend-FastAPI-green)
-
-An autonomous AI agent that detects, fixes, and verifies code issues in CI/CD pipelines. 
----
-
-
----
+An autonomous AI-powered DevOps agent that detects, fixes, and verifies code issues within CI/CD pipelines—reducing manual debugging effort and improving development velocity.
 
 ## 🏗 Architecture
 
-The system follows a multi-agent architecture with a React frontend and Python/FastAPI backend using LangGraph.
+The system follows a multi-agent architecture with a React frontend and a Python (FastAPI) backend powered by LangGraph.
 
 ```mermaid
 graph TD
@@ -29,75 +20,96 @@ graph TD
     end
     
     Agent -->|Stream Status| Dashboard[React Dashboard]
-```
 
-## ✨ Features
 
-- **Autonomous Healing**: Detects Syntax, Linting, Import, and Logic errors.
-- **Sandboxed Execution**: Runs tests in a safe Docker environment.
-- **Real-time Dashboard**: Visualizes the fix process, score, and timeline.
-- **Smart Branching**: Creates branches in the required format `TEAM_NAME_LEADER_NAME_AI_Fix`.
-- **Deterministic & AI Fixes**: Uses both rule-based and LLM-based fixing strategies.
+Features
 
-## 🛠 Tech Stack
+Autonomous Issue Resolution
+Detects and fixes syntax, linting, import, and logical errors automatically.
 
-- **Frontend**: React (Vite), TailwindCSS, Lucide Icons
-- **Backend**: Python (FastAPI), LangGraph, LangChain, Google Gemini (LLM)
-- **Tools**: Docker, GitPython, Pylint, Pytest
+Sandboxed Execution
+Runs tests securely inside a Docker environment.
 
-## 📦 Installation & Setup
+Real-Time Monitoring
+Live dashboard showing progress, fix status, and execution timeline.
 
-### Prerequisites
-- Python 3.9+
-- Node.js 18+
-- Docker (Running)
-- Google Cloud API Key (for LLM)
+Automated Branch Management
+Generates structured branches for fixes (e.g., team_lead_ai_fix).
 
-### Backend Setup
-1.  Navigate to `backend`:
-    ```bash
-    cd backend
-    ```
-2.  Install dependencies:
-    ```bash
-    pip install -r requirements.txt
-    ```
-3.  Set Environment Variables:
-    ```bash
-    export GOOGLE_API_KEY="your_api_key_here"
-    ```
-4.  Run the server:
-    ```bash
-    uvicorn main:app --reload
-    ```
+Hybrid Fixing Strategy
+Combines deterministic rules with LLM-based intelligent fixes.
 
-### Frontend Setup
-1.  Navigate to `frontend`:
-    ```bash
-    cd frontend
-    ```
-2.  Install dependencies:
-    ```bash
-    npm install
-    ```
-3.  Run the development server:
-    ```bash
-    npm run dev
-    ```
+Tech Stack
+Frontend
+React (Vite)
+Tailwind CSS
+Lucide Icons
 
-## 🐛 Supported Bug Types
+Backend
+Python (FastAPI)
+LangGraph
+LangChain
+Google Gemini (LLM)
+
+Tools & Infrastructure
+Docker
+GitPython
+Pylint
+Pytest
+
+Installation & Setup
+Prerequisites
+Python 3.9+
+Node.js 18+
+Docker (must be running)
+Google API Key (for LLM access)
+
+Backend Setup
+
+cd backend
+pip install -r requirements.txt
+export GOOGLE_API_KEY="your_api_key_here"
+uvicorn main:app --reload
+
+Frontend Setup
+
+cd frontend
+npm install
+npm run dev
+
+Supported Issue Types
 
 The agent can currently detect and fix:
-1.  **SYNTAX**: Missing colons, indentation errors.
-2.  **LINTING**: Unused imports, missing docstrings.
-3.  **IMPORT**: `ModuleNotFoundError` or `ImportError`.
-4.  **LOGIC**: Test failures (via pytest output analysis).
-5.  **TYPE_ERROR**: Basic type mismatches (if caught by linter).
 
-## ⚠️ Known Limitations
+Syntax Errors
+Missing colons, indentation issues, invalid syntax.
 
--   **Docker Dependency**: The host machine must have Docker running for sandboxed test execution.
--   **LLM Rate Limits**: Heavy usage may hit Gemini API rate limits (retry logic is implemented).
--   **Complex Logic**: Deep architectural bugs may require human intervention.
+Linting Issues
+Unused imports, formatting problems, missing docstrings.
 
+Import Errors
+ModuleNotFoundError, incorrect imports.
 
+Logical Errors
+Test failures detected via pytest output.
+
+Type Errors
+Basic type mismatches identified by linters.
+
+Known Limitations
+
+Docker Requirement
+Docker must be installed and running for sandbox execution.
+
+API Rate Limits
+High usage may hit LLM rate limits (retry mechanisms included).
+
+Complex Bugs
+Deep architectural or design-level issues may require manual intervention.
+
+Future Improvements
+
+Support for more programming languages
+Smarter root-cause analysis for complex failures
+Integration with CI platforms (GitHub Actions, GitLab CI)
+Enhanced debugging insights and reporting
