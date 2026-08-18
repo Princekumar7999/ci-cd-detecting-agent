@@ -12,3 +12,20 @@ __pycache__/
 
 # Ignore package-lock in backend
 backend/package-lock.json
+
+# Python virtual environments and cache
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+
+# Logs
+*.log
+
+# Secrets
+.env
+.env.*
+
+# Frontend dependencies and build output
+frontend/node_modules/
+frontend/dist/
