@@ -57,7 +57,9 @@ def run_agent_task(run_id: str, request: RepoRequest):
         shutil.rmtree(workspace_dir)
     os.makedirs(workspace_dir, exist_ok=True)
     
-    start_time = results_store[run_id]["start_time"]
+    import re
+    clean_branch = re.sub(r'[^a-zA-Z0-9_-]', '_', request.team_name.strip()).strip('_')
+    branch_name = clean_branch if clean_branch else "ai_agent_fix"
     
     # Initialize state
     state: AgentState = {
@@ -65,7 +67,7 @@ def run_agent_task(run_id: str, request: RepoRequest):
         "team_name": request.team_name,
         "leader_name": request.leader_name,
         "workspace_dir": workspace_dir,
-        "branch_name": "main", # Default branch name
+        "branch_name": branch_name,
         "iteration": 0,
         "max_iterations": 5, # Conform to default retry limit 5
         "lint_errors": [],
@@ -244,11 +246,16 @@ def run_agent_task(run_id: str, request: RepoRequest):
 def analyze_repo(request: RepoRequest, background_tasks: BackgroundTasks):
     run_id = str(uuid.uuid4())
 
+    import re
+    clean_branch = re.sub(r'[^a-zA-Z0-9_-]', '_', request.team_name.strip()).strip('_')
+    branch_name = clean_branch if clean_branch else "ai_agent_fix"
+
     results_store[run_id] = {
         "status": "pending",
         "request": request.dict(),
         "start_time": get_utc_iso(),
         "end_time": "",
+        "branch_name": branch_name,
         "iteration": 0,
         "lint_errors": [],
         "test_failures": [],
