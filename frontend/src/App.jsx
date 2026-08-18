@@ -92,7 +92,7 @@ function App() {
             <label className="text-slate-300 text-sm font-semibold tracking-wide uppercase">GitHub Repository URL</label>
             <input
               className="w-full bg-slate-950/50 border border-slate-700 rounded-lg px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-              placeholder="https://github.com/user/repo"
+              placeholder="e.g. Give Github Repo URL"
               value={repoUrl}
               onChange={e => setRepoUrl(e.target.value)}
             />
@@ -100,16 +100,16 @@ function App() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-3">
-              <label className="text-slate-300 text-sm font-semibold tracking-wide uppercase">Team Name</label>
+              <label className="text-slate-300 text-sm font-semibold tracking-wide uppercase">Name/Team Name</label>
               <input
                 className="w-full bg-slate-950/50 border border-slate-700 rounded-lg px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                placeholder="e.g. RIFT ORGANISERS"
+                placeholder="e.g. THE_FIGHT"
                 value={teamName}
                 onChange={e => setTeamName(e.target.value)}
               />
             </div>
             <div className="space-y-3">
-              <label className="text-slate-300 text-sm font-semibold tracking-wide uppercase">Team Leader</label>
+              <label className="text-slate-300 text-sm font-semibold tracking-wide uppercase">Leader/Team Leader</label>
               <input
                 className="w-full bg-slate-950/50 border border-slate-700 rounded-lg px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                 placeholder="e.g. Saiyam Kumar"

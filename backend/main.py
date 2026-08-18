@@ -5,6 +5,12 @@ import uuid
 import logging
 import os
 import shutil
+from dotenv import load_dotenv
+
+# Load .env from current directory or parent directory
+load_dotenv()
+load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
+
 # Import Agent Core
 try:
     from backend.agent.core import build_agent_graph, AgentState
@@ -19,9 +25,9 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-    "http://localhost:5173",
-    "https://ci-cd-detecting-agent-1.onrender.com",
-],
+        "http://localhost:5173",
+        "https://ci-cd-detecting-agent-1.onrender.com",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

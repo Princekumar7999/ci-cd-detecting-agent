@@ -5,6 +5,12 @@ from typing import Dict, Any
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate
 
+from dotenv import load_dotenv
+
+# Load .env
+load_dotenv()
+load_dotenv(os.path.join(os.path.dirname(__file__), "../..", ".env"))
+
 logger = logging.getLogger(__name__)
 
 class Fixer:
@@ -15,9 +21,14 @@ class Fixer:
     @property
     def llm(self):
         if self._llm is None:
-            # Use gemini-2.0-flash-lite-001 for better rate limits and availability
+            api_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
+            if not api_key:
+                raise ValueError("GOOGLE_API_KEY is not set. Please set GOOGLE_API_KEY in your .env file or environment.")
+            
+            model_name = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
             self._llm = ChatGoogleGenerativeAI(
-                model="models/gemini-2.0-flash-lite-001", 
+                model=model_name,
+                google_api_key=api_key,
                 temperature=0,
                 convert_system_message_to_human=True
             )

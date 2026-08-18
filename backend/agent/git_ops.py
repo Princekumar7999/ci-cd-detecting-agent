@@ -5,8 +5,11 @@ from typing import Optional
 
 class GitOps:
     def __init__(self, repo_url: str, team_name: str, leader_name: str, workspace_dir: str = "/tmp/repo"):
-        self.repo_url = repo_url
         import re
+        url = repo_url.strip()
+        if url and not url.startswith("http://") and not url.startswith("https://") and not url.startswith("git@"):
+            url = f"https://github.com/{url}"
+        self.repo_url = url
         self.team_name = re.sub(r'[^A-Z0-9_]', '', team_name.strip().upper().replace(" ", "_"))
         self.leader_name = re.sub(r'[^A-Z0-9_]', '', leader_name.strip().upper().replace(" ", "_"))
         self.branch_name = "main"
