@@ -23,12 +23,18 @@ class GitOps:
         print(f"Cloning {self.repo_url} to {self.workspace_dir}...")
         self.repo = git.Repo.clone_from(self.repo_url, self.workspace_dir)
         
-        print(f"Checking out branch {self.branch_name}...")
-        # Create and checkout new branch
+        current_branch = None
         try:
-            self.repo.git.checkout("-b", self.branch_name)
-        except git.GitCommandError:
-            self.repo.git.checkout(self.branch_name)
+            current_branch = self.repo.active_branch.name
+        except Exception:
+            pass
+
+        if current_branch != self.branch_name:
+            print(f"Checking out branch {self.branch_name}...")
+            try:
+                self.repo.git.checkout("-b", self.branch_name)
+            except git.GitCommandError:
+                self.repo.git.checkout(self.branch_name)
 
     def commit_changes(self, message: str):
         if not self.repo:

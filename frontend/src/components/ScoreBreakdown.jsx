@@ -1,18 +1,30 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState, useRef } from "react";
+
+function parseUtcTime(timeStr) {
+    if (!timeStr) return null;
+    const hasTz = timeStr.endsWith('Z') || /[+-]\d{2}(:\d{2})?$/.test(timeStr);
+    const normalized = hasTz ? timeStr : `${timeStr}Z`;
+    const parsed = new Date(normalized).getTime();
+    return isNaN(parsed) ? null : parsed;
+}
 
 export default function ScoreBreakdown({ data }) {
     const [now, setNow] = useState(Date.now());
+    const localStartTime = useRef(Date.now());
 
     // Update time for live duration
     useEffect(() => {
-        if (data.status === 'running') {
+        if (data.status === 'running' || data.status === 'pending') {
             const interval = setInterval(() => setNow(Date.now()), 1000);
             return () => clearInterval(interval);
         }
     }, [data.status]);
 
-    const startTime = new Date(data.start_time).getTime();
-    const endTime = data.end_time ? new Date(data.end_time).getTime() : now;
+    const serverStart = parseUtcTime(data.start_time);
+    const startTime = serverStart || localStartTime.current;
+    const isFinished = data.status === 'completed' || data.status === 'failed';
+    const serverEnd = isFinished ? parseUtcTime(data.end_time) : null;
+    const endTime = serverEnd || now;
     const durationMs = Math.max(0, endTime - startTime);
     const durationMinutes = durationMs / 60000;
 

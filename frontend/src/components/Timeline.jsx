@@ -1,3 +1,11 @@
+function formatLocalTime(timeStr) {
+    if (!timeStr) return '';
+    const hasTz = timeStr.endsWith('Z') || /[+-]\d{2}(:\d{2})?$/.test(timeStr);
+    const normalized = hasTz ? timeStr : `${timeStr}Z`;
+    const d = new Date(normalized);
+    return isNaN(d.getTime()) ? '' : d.toLocaleTimeString();
+}
+
 export default function Timeline({ data }) {
     const iteration = data.iteration || 0;
     const maxIterations = data.max_iterations || 5;
@@ -22,7 +30,7 @@ export default function Timeline({ data }) {
                     <div className="flex-1 pt-1">
                         <div className="flex justify-between items-start">
                             <div className="text-slate-200 font-bold">Analysis Started</div>
-                            <time className="font-mono text-xs text-slate-500">{new Date(data.start_time).toLocaleTimeString()}</time>
+                            <time className="font-mono text-xs text-slate-500">{formatLocalTime(data.start_time)}</time>
                         </div>
                         <div className="text-xs text-slate-400 mt-1">Repository cloned & Initial Scan</div>
                     </div>
@@ -31,7 +39,7 @@ export default function Timeline({ data }) {
                 {/* Iterations */}
                 {data.iterations_log && data.iterations_log.map((run, i) => {
                     const isFailed = run.status === 'FAILED';
-                    const timeStr = run.timestamp ? new Date(run.timestamp).toLocaleTimeString() : '';
+                    const timeStr = formatLocalTime(run.timestamp);
                     return (
                         <div key={i} className="relative flex items-start gap-4 pb-8 group animate-fade-in-up" style={{ animationDelay: `${i * 100}ms` }}>
                             <div className={`z-10 flex items-center justify-center w-10 h-10 rounded-full border-2 bg-slate-900 shadow shrink-0 transition-colors ${
@@ -79,7 +87,7 @@ export default function Timeline({ data }) {
                                 <div className={`font-bold ${isPassed ? 'text-green-400' : 'text-red-400'}`}>
                                     {isPassed ? 'Pipeline Passed' : 'Pipeline Failed'}
                                 </div>
-                                <time className="font-mono text-xs text-slate-500">{data.end_time ? new Date(data.end_time).toLocaleTimeString() : ''}</time>
+                                <time className="font-mono text-xs text-slate-500">{formatLocalTime(data.end_time)}</time>
                             </div>
                             <div className="text-xs text-slate-400 mt-1">Process finished</div>
                         </div>

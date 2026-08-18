@@ -42,7 +42,10 @@ class RepoRequest(BaseModel):
 # Key: run_id, Value: AgentState
 results_store = {}
 
-import datetime
+from datetime import datetime, timezone
+
+def get_utc_iso() -> str:
+    return datetime.now(timezone.utc).isoformat()
 
 def run_agent_task(run_id: str, request: RepoRequest):
     logger.info(f"Starting agent run {run_id} for {request.repo_url}")
@@ -93,7 +96,7 @@ def run_agent_task(run_id: str, request: RepoRequest):
             {
                 "iteration": 0,
                 "status": "FAILED",
-                "timestamp": datetime.datetime.now().isoformat(),
+                "timestamp": get_utc_iso(),
                 "lint_errors_count": 4,
                 "test_failures_count": 0
             }
@@ -118,7 +121,7 @@ def run_agent_task(run_id: str, request: RepoRequest):
             {
                 "iteration": 1,
                 "status": "FAILED",
-                "timestamp": datetime.datetime.now().isoformat(),
+                "timestamp": get_utc_iso(),
                 "lint_errors_count": 3,
                 "test_failures_count": 0
             }
@@ -130,7 +133,7 @@ def run_agent_task(run_id: str, request: RepoRequest):
         
         # Mock State - FINAL
         state["status"] = "completed"
-        state["end_time"] = datetime.datetime.now().isoformat()
+        state["end_time"] = get_utc_iso()
         state["iteration"] = 3
         
         # 4 Total Failures = 0 Remaining + 4 Processed (in fixed_issues)
@@ -172,7 +175,7 @@ def run_agent_task(run_id: str, request: RepoRequest):
             {
                 "iteration": 2,
                 "status": "PASSED",
-                "timestamp": datetime.datetime.now().isoformat(),
+                "timestamp": get_utc_iso(),
                 "lint_errors_count": 0,
                 "test_failures_count": 0
             }
@@ -189,19 +192,25 @@ def run_agent_task(run_id: str, request: RepoRequest):
     app_graph = build_agent_graph()
     
     try:
-        # Invoke the graph
-        logger.info("Invoking agent graph...")
-        final_state = app_graph.invoke(state)
+        # Stream the graph execution for live updates
+        logger.info("Invoking agent graph with live updates...")
+        for event in app_graph.stream(state):
+            for node_name, node_output in event.items():
+                logger.info(f"Node '{node_name}' completed.")
+                if isinstance(node_output, dict):
+                    state.update(node_output)
+                results_store[run_id] = dict(state)
         
-        # Update store with final state
-        final_state["status"] = "completed"
-        final_state["end_time"] = datetime.datetime.now().isoformat()
-        results_store[run_id] = final_state
+        # Update store with final status if not set
+        if state.get("status") not in ["completed", "failed"]:
+            state["status"] = "completed"
+        state["end_time"] = get_utc_iso()
+        results_store[run_id] = dict(state)
         
-        # Generator results.json
+        # Write results.json
         import json
         with open(os.path.join(workspace_dir, "results.json"), "w") as f:
-            json.dump(final_state, f, indent=2)
+            json.dump(state, f, indent=2)
             
     except Exception as e:
         logger.error(f"Agent run failed: {e}", exc_info=True)
@@ -238,7 +247,7 @@ def analyze_repo(request: RepoRequest, background_tasks: BackgroundTasks):
     results_store[run_id] = {
         "status": "pending",
         "request": request.dict(),
-        "start_time": datetime.datetime.now().isoformat(),
+        "start_time": get_utc_iso(),
         "end_time": "",
         "iteration": 0,
         "lint_errors": [],

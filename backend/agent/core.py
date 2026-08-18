@@ -41,14 +41,14 @@ def analyze_code(state: AgentState):
     analyzer = Analyzer(state["workspace_dir"])
     results = analyzer.analyze()
     
-    import datetime
+    from datetime import datetime, timezone
     iter_num = state.get("iteration", 0)
     has_errors = len(results["lint_errors"]) > 0 or len(results["test_failures"]) > 0
     
     new_log_entry = {
         "iteration": iter_num,
         "status": "FAILED" if has_errors else "PASSED",
-        "timestamp": datetime.datetime.now().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "lint_errors_count": len(results["lint_errors"]),
         "test_failures_count": len(results["test_failures"])
     }
