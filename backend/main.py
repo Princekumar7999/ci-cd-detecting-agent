@@ -250,6 +250,12 @@ def analyze_repo(request: RepoRequest, background_tasks: BackgroundTasks):
     background_tasks.add_task(run_agent_task, run_id, request)
     return {"run_id": run_id, "status": "started"}
 
+@app.get("/results/{run_id}")
+def get_results(run_id: str):
+    if run_id not in results_store:
+        raise HTTPException(status_code=404, detail="Run ID not found")
+    return results_store[run_id]
+
 @app.get("/status")
 def health_check():
     return {"status": "ok", "service": "DevOps Agent Backend"}
