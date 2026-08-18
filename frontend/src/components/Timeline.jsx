@@ -29,17 +29,40 @@ export default function Timeline({ data }) {
                 </div>
 
                 {/* Iterations */}
-                {Array.from({ length: iteration }).map((_, i) => (
-                    <div key={i} className="relative flex items-start gap-4 pb-8 group animate-fade-in-up" style={{ animationDelay: `${i * 200}ms` }}>
-                        <div className="z-10 flex items-center justify-center w-10 h-10 rounded-full border-2 border-slate-700 bg-slate-900 shadow shrink-0 text-blue-400 group-hover:border-blue-400 transition-colors">
-                            <span className="font-bold text-sm">{i + 1}</span>
+                {data.iterations_log && data.iterations_log.map((run, i) => {
+                    const isFailed = run.status === 'FAILED';
+                    const timeStr = run.timestamp ? new Date(run.timestamp).toLocaleTimeString() : '';
+                    return (
+                        <div key={i} className="relative flex items-start gap-4 pb-8 group animate-fade-in-up" style={{ animationDelay: `${i * 100}ms` }}>
+                            <div className={`z-10 flex items-center justify-center w-10 h-10 rounded-full border-2 bg-slate-900 shadow shrink-0 transition-colors ${
+                                isFailed ? 'text-red-400 border-red-500/50 group-hover:border-red-400' : 'text-green-400 border-green-500/50 group-hover:border-green-400'
+                            }`}>
+                                {isFailed ? (
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                                ) : (
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                                )}
+                            </div>
+                            <div className="flex-1 pt-1">
+                                <div className="flex justify-between items-start">
+                                    <div className="text-slate-200 font-bold">
+                                        {run.iteration === 0 ? "Initial Run" : `Iteration ${run.iteration}`}
+                                    </div>
+                                    <time className="font-mono text-xs text-slate-500">{timeStr}</time>
+                                </div>
+                                <div className="text-xs text-slate-400 mt-1">
+                                    {isFailed ? (
+                                        <span className="text-red-400/80">
+                                            Failed ({run.lint_errors_count} lints, {run.test_failures_count} tests remaining)
+                                        </span>
+                                    ) : (
+                                        <span className="text-green-400/80">Passed (All checks passed)</span>
+                                    )}
+                                </div>
+                            </div>
                         </div>
-                        <div className="flex-1 pt-1">
-                            <div className="text-slate-200 font-bold">Iteration {i + 1}</div>
-                            <div className="text-xs text-slate-400 mt-1">Automated Fix applied & Tests re-run</div>
-                        </div>
-                    </div>
-                ))}
+                    );
+                })}
 
                 {/* Current / End */}
                 {(status === 'completed' || status === 'failed') && (

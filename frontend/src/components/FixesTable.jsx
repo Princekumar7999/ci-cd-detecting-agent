@@ -27,25 +27,29 @@ export default function FixesTable({ data }) {
                                 <tr key={idx} className="hover:bg-slate-800/50 transition-colors animate-fade-in-up" style={{ animationDelay: `${idx * 100}ms` }}>
                                     <td className="px-4 py-3 font-mono text-blue-400 font-medium">{fix.file}</td>
                                     <td className="px-4 py-3">
-                                        <span className={`px-2 py-1 rounded text-xs font-bold border ${fix.bug_type === 'SYNTAX' ? 'bg-red-500/10 border-red-500/20 text-red-400' :
-                                                fix.bug_type === 'LINTING' ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-400' :
-                                                    'bg-blue-500/10 border-blue-500/20 text-blue-400'
-                                            }`}>{fix.bug_type}</span>
+                                        <span className={`px-2 py-1 rounded text-xs font-bold border ${
+                                            fix.bug_type === 'SYNTAX' ? 'bg-red-500/10 border-red-500/20 text-red-400' :
+                                            fix.bug_type === 'INDENTATION' ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' :
+                                            fix.bug_type === 'IMPORT' ? 'bg-cyan-500/10 border-cyan-500/20 text-cyan-400' :
+                                            fix.bug_type === 'TYPE_ERROR' ? 'bg-purple-500/10 border-purple-500/20 text-purple-400' :
+                                            fix.bug_type === 'LOGIC' ? 'bg-orange-500/10 border-orange-500/20 text-orange-400' :
+                                            'bg-yellow-500/10 border-yellow-500/20 text-yellow-400' // Default LINTING / others
+                                        }`}>{fix.bug_type}</span>
                                     </td>
                                     <td className="px-4 py-3 font-mono">{fix.line}</td>
                                     <td className="px-4 py-3 text-slate-300 truncate max-w-xs" title={fix.commit_message}>
                                         {fix.commit_message}
                                     </td>
                                     <td className="px-4 py-3 text-center">
-                                        {fix.status === 'Fixed' ? (
+                                        {fix.status.startsWith('Fixed') ? (
                                             <span className="text-green-400 font-bold flex items-center justify-center gap-1">
                                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                                                Fixed
+                                                ✓ Fixed
                                             </span>
                                         ) : (
                                             <span className="text-red-400 font-bold flex items-center justify-center gap-1">
                                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                                                Failed
+                                                ✗ Failed
                                             </span>
                                         )}
                                     </td>

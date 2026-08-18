@@ -20,7 +20,7 @@ state = {
     "leader_name": leader_name,
     "workspace_dir": workspace_dir,
     "iteration": 0,
-    "max_iterations": 3,
+    "max_iterations": 5,
     "lint_errors": [],
     "test_failures": [],
     "fixed_issues": [],

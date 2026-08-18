@@ -38,12 +38,22 @@ class Analyzer:
         # Use simple recursion if find is tricky, or just target .
         # Wrap in sh -c and redirect stderr
         # Must set PYTHONPATH to current dir so pylint can resolve imports (e.g. src.validator)
-        cmd = '/bin/sh -c "export PYTHONPATH=$PYTHONPATH:. && pylint --output-format=json --recursive=y . 2>&1"'
+        cmd = '/bin/sh -c "export PYTHONPATH=$PYTHONPATH:. && pylint --ignore=venv,env,.venv,.git --output-format=json --recursive=y . 2>&1"'
         result = self.sandbox.run_command(cmd, timeout=300)
         
         logger.info(f"Linter raw output: {result['output']}")
         logger.info(f"Linter exit code: {result['exit_code']}")
         
+        # Handle Timeout
+        if result.get("timeout"):
+             return [{
+                 "file": "timeout",
+                 "line": 0,
+                 "type": "TIMEOUT",
+                 "message": "Linter execution timed out. Try ignoring large folders.",
+                 "symbol": "timeout"
+             }]
+             
         errors = []
         try:
             output_str = result["output"]
@@ -56,10 +66,15 @@ class Analyzer:
                 lint_data = json.loads(json_str)
                 
                 for item in lint_data:
-                    # Filter for errors (E) and fatal (F). Maybe warnings (W)?
-                    # The prompt implies we need to fix "Unused import" which is a Warning (W0611).
-                    # So we should include everything that pylint reports.
-                    
+                    # Filter only for actual warnings, errors and fatals
+                    item_type = item.get("type")
+                    if item_type not in ["warning", "error", "fatal"]:
+                        continue
+
+                    # Filter out non-essential style warnings, keeping only 'unused-import'
+                    if item_type == "warning" and item.get("symbol") != "unused-import":
+                        continue
+
                     bug_type = "LINTING"
                     msg_lower = item["message"].lower()
                     symbol = item.get("symbolid") or item.get("message-id") or item.get("symbol")

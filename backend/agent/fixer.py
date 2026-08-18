@@ -52,7 +52,7 @@ class Fixer:
                     
                     with open(file_path, "w") as f:
                         f.write(fixed_content)
-                    return f"Fix SYNTAX in {error['file']}: Added missing colon (Deterministic)"
+                    return f"SYNTAX error in {error['file']} line {error['line']} → Fix: add the colon at the correct position"
 
         # Deterministic Fix for Unused Imports
         if error['type'] in ["LINTING", "IMPORT"] and "unused import" in error['message'].lower():
@@ -68,23 +68,31 @@ class Fixer:
                 
                 with open(file_path, "w") as f:
                     f.write(fixed_content)
-                return f"Fix LINT in {error['file']}: Removed unused import (Deterministic)"
+                return f"LINTING error in {error['file']} line {error['line']} → Fix: remove the import statement"
 
         logger.info(f"Attempting to fix error: {error}")
 
         # Deterministic Fix for ModuleNotFoundError (specific to devops_challenge_repo)
         msg = error.get('message', '')
-        if "validator" in msg and ("ModuleNotFoundError" in msg or "ImportError" in msg):
+        if "validator" in msg and ("modulenotfounderror" in msg or "importerror" in msg):
              logger.info(f"Applying deterministic fix for ModuleNotFoundError in {error['file']}")
              lines = content.splitlines()
              for i, line in enumerate(lines):
                  if "from validator import validate" in line:
-                     lines[i] = "import sys\nimport os\nsys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))\nfrom validator import validate"
+                     # Check what we need to import
+                     imports = []
+                     if not any(l.strip() == "import sys" for l in lines):
+                         imports.append("import sys")
+                     if not any(l.strip() == "import os" for l in lines):
+                         imports.append("import os")
+                     
+                     prefix = "\n".join(imports) + "\n" if imports else ""
+                     lines[i] = f"{prefix}sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))\nfrom validator import validate"
                      break
              fixed_content = "\n".join(lines)
              with open(file_path, "w") as f:
                  f.write(fixed_content)
-             return f"Fix IMPORT in {error['file']}: Added src to sys.path (Deterministic)"
+             return f"IMPORT error in {error['file']} line {error['line']} → Fix: add src to sys.path"
 
         # Construct a prompt for the fix
         logger.info(f"Fixing {error['type']} in {error['file']} at line {error['line']} using Gemini")

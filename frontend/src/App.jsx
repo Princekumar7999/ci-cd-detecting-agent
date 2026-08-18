@@ -17,14 +17,20 @@ function App() {
       interval = setInterval(async () => {
         try {
           const res = await fetch(`${API_URL}/results/${runId}`)
-          if (!res.ok) return;
+          if (!res.ok) {
+            if (res.status === 404) {
+              console.warn("Run ID not found on backend (server may have restarted). Stopping polling.");
+              setIsLoading(false);
+            }
+            return;
+          }
           const json = await res.json()
           setData(json)
           if (json.status === 'completed' || json.status === 'failed') {
             setIsLoading(false)
           }
         } catch (e) {
-          console.error(e)
+          console.error("Polling error:", e);
         }
       }, 2000)
     }
@@ -61,7 +67,22 @@ function App() {
         <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 mb-2">
           Autonomous DevOps Agent
         </h1>
-        <p className="text-slate-400">Self-healing CI/CD Pipeline & Code Fixer</p>
+        <p className="text-slate-400 mb-4">Self-healing CI/CD Pipeline & Code Fixer</p>
+        {runId && (
+          <button
+            onClick={() => {
+              setRunId(null)
+              setData(null)
+              setIsLoading(false)
+            }}
+            className="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-4 py-2 rounded-lg font-semibold text-sm transition-all shadow active:scale-95"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89M9 11l3-3 3 3m-3-3v12" />
+            </svg>
+            Run Another Repository
+          </button>
+        )}
       </div>
 
       {/* Input Section */}

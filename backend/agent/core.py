@@ -15,6 +15,7 @@ class AgentState(TypedDict):
     team_name: str
     leader_name: str
     workspace_dir: str
+    branch_name: str # Added to track active branch dynamically
     
     iteration: int
     max_iterations: int
@@ -22,6 +23,7 @@ class AgentState(TypedDict):
     lint_errors: List[Dict]
     test_failures: List[Dict]
     fixed_issues: List[Dict] # Log of fixes
+    iterations_log: List[Dict] # Telemetry / run history log
     
     start_time: str
     end_time: str
@@ -32,15 +34,32 @@ def clone_repo(state: AgentState):
     logger.info("Node: clone_repo")
     git_ops = GitOps(state["repo_url"], state["team_name"], state["leader_name"], state["workspace_dir"])
     git_ops.clone_repo()
-    return {"status": "cloned", "iteration": 0}
+    return {"status": "cloned", "iteration": 0, "branch_name": git_ops.branch_name}
 
 def analyze_code(state: AgentState):
     logger.info("Node: analyze_code")
     analyzer = Analyzer(state["workspace_dir"])
     results = analyzer.analyze()
+    
+    import datetime
+    iter_num = state.get("iteration", 0)
+    has_errors = len(results["lint_errors"]) > 0 or len(results["test_failures"]) > 0
+    
+    new_log_entry = {
+        "iteration": iter_num,
+        "status": "FAILED" if has_errors else "PASSED",
+        "timestamp": datetime.datetime.now().isoformat(),
+        "lint_errors_count": len(results["lint_errors"]),
+        "test_failures_count": len(results["test_failures"])
+    }
+    
+    current_log = state.get("iterations_log", []) or []
+    updated_log = current_log + [new_log_entry]
+    
     return {
         "lint_errors": results["lint_errors"],
-        "test_failures": results["test_failures"]
+        "test_failures": results["test_failures"],
+        "iterations_log": updated_log
     }
 
 def check_health(state: AgentState):
@@ -138,6 +157,14 @@ def apply_fix(state: AgentState):
         "fixed_issues": state["fixed_issues"] + [new_fix_entry]
     }
 
+def finalize_success(state: AgentState):
+    logger.info("Node: finalize_success")
+    return {"status": "completed"}
+
+def finalize_failure(state: AgentState):
+    logger.info("Node: finalize_failure")
+    return {"status": "failed"}
+
 # Define the graph
 def build_agent_graph():
     workflow = StateGraph(AgentState)
@@ -145,6 +172,8 @@ def build_agent_graph():
     workflow.add_node("clone_repo", clone_repo)
     workflow.add_node("analyze_code", analyze_code)
     workflow.add_node("apply_fix", apply_fix)
+    workflow.add_node("finalize_success", finalize_success)
+    workflow.add_node("finalize_failure", finalize_failure)
     
     workflow.set_entry_point("clone_repo")
     
@@ -154,12 +183,14 @@ def build_agent_graph():
         "analyze_code",
         check_health,
         {
-            "passed": END,
-            "failed": END,
+            "passed": "finalize_success",
+            "failed": "finalize_failure",
             "fix_needed": "apply_fix"
         }
     )
     
     workflow.add_edge("apply_fix", "analyze_code")
+    workflow.add_edge("finalize_success", END)
+    workflow.add_edge("finalize_failure", END)
     
     return workflow.compile()

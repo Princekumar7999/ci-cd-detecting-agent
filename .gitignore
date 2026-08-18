@@ -1,0 +1,14 @@
+# Ignore credentials
+.env
+
+# Ignore local sample repository used for testing
+sample_repo/
+
+# Ignore python caches and logs
+__pycache__/
+*.pyc
+.pytest_cache/
+*.log
+
+# Ignore package-lock in backend
+backend/package-lock.json

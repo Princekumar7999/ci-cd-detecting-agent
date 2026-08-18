@@ -53,11 +53,13 @@ def run_agent_task(run_id: str, request: RepoRequest):
         "team_name": request.team_name,
         "leader_name": request.leader_name,
         "workspace_dir": workspace_dir,
+        "branch_name": "main", # Default branch name
         "iteration": 0,
-        "max_iterations": 3, 
+        "max_iterations": 5, # Conform to default retry limit 5
         "lint_errors": [],
         "test_failures": [],
         "fixed_issues": [],
+        "iterations_log": [],
         "start_time": start_time,
         "end_time": "",
         "status": "running"
@@ -66,11 +68,10 @@ def run_agent_task(run_id: str, request: RepoRequest):
     # Store initial state
     results_store[run_id] = state
 
-    # --- DEMO MODE TRIGGER (ALWAYS ACTIVE) ---
-    if True: # request.team_name.upper() == "DEMO":
+    # --- DEMO MODE TRIGGER ---
+    if request.team_name.strip().upper() == "DEMO" or request.leader_name.strip().upper() == "DEMO":
         logger.info("DEMO MODE ACTIVATED: Simulating 60s run with specific failures.")
         import time
-        import random
         
         # Simulate Analysis Phase (15s)
         time.sleep(15)
@@ -79,6 +80,15 @@ def run_agent_task(run_id: str, request: RepoRequest):
         state["status"] = "running"
         state["iteration"] = 1
         state["lint_errors"] = [{"file": "src/utils.py", "line": 23, "type": "LINTING", "message": "Simulated error"}] # Dummy to show activity
+        state["iterations_log"] = [
+            {
+                "iteration": 0,
+                "status": "FAILED",
+                "timestamp": datetime.datetime.now().isoformat(),
+                "lint_errors_count": 4,
+                "test_failures_count": 0
+            }
+        ]
         results_store[run_id] = state
         
         # Simulate Fix Phase (15s)
@@ -91,8 +101,17 @@ def run_agent_task(run_id: str, request: RepoRequest):
                 "file": "src/validator.py", 
                 "bug_type": "SYNTAX", 
                 "line": 8,
-                "commit_message": "Fix SYNTAX: Added missing colon at end of line", 
+                "commit_message": "SYNTAX error in src/validator.py line 8 → Fix: add the colon at the correct position", 
                 "status": "Fixed"
+            }
+        ]
+        state["iterations_log"] = state["iterations_log"] + [
+            {
+                "iteration": 1,
+                "status": "FAILED",
+                "timestamp": datetime.datetime.now().isoformat(),
+                "lint_errors_count": 3,
+                "test_failures_count": 0
             }
         ]
         results_store[run_id] = state
@@ -114,29 +133,39 @@ def run_agent_task(run_id: str, request: RepoRequest):
                 "file": "src/validator.py", 
                 "bug_type": "SYNTAX", 
                 "line": 8,
-                "commit_message": "Fix SYNTAX: Added missing colon at end of line", 
+                "commit_message": "SYNTAX error in src/validator.py line 8 → Fix: add the colon at the correct position", 
                 "status": "Fixed"
             },
             {
                 "file": "tests/test_api.py", 
                 "bug_type": "SYNTAX", 
                 "line": 14,
-                "commit_message": "Fix SYNTAX: Corrected indentation block", 
+                "commit_message": "SYNTAX error in tests/test_api.py line 14 → Fix: corrected indentation block", 
                 "status": "Fixed"
             },
             {
                 "file": "src/utils.py", 
                 "bug_type": "LINTING", 
-                "line": 23,
-                "commit_message": "Failed: API Rate Limit Exceeded (429)", 
-                "status": "Failed"
+                "line": 15,
+                "commit_message": "LINTING error in src/utils.py line 15 → Fix: remove the import statement", 
+                "status": "Fixed"
             },
             {
                 "file": "src/config.py", 
                 "bug_type": "LINTING", 
                 "line": 2, 
-                "commit_message": "Failed: API Rate Limit Exceeded (Quota Reached)", 
-                "status": "Failed"
+                "commit_message": "LINTING error in src/config.py line 2 → Fix: remove the import statement", 
+                "status": "Fixed"
+            }
+        ]
+        
+        state["iterations_log"] = state["iterations_log"] + [
+            {
+                "iteration": 2,
+                "status": "PASSED",
+                "timestamp": datetime.datetime.now().isoformat(),
+                "lint_errors_count": 0,
+                "test_failures_count": 0
             }
         ]
         
@@ -159,13 +188,6 @@ def run_agent_task(run_id: str, request: RepoRequest):
         final_state["status"] = "completed"
         final_state["end_time"] = datetime.datetime.now().isoformat()
         results_store[run_id] = final_state
-        
-        # Generator results.json
-        import json
-        with open(os.path.join(workspace_dir, "results.json"), "w") as f:
-            json.dump(final_state, f, indent=2)
-            
-        results_store[run_id] = state
         
         # Generator results.json
         import json

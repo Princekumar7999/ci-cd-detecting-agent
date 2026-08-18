@@ -2,10 +2,8 @@ export default function SummaryCard({ data }) {
     const failures = (data.lint_errors?.length || 0) + (data.test_failures?.length || 0);
     const fixes = data.fixed_issues?.length || 0;
 
-    // Construct branch name exactly as required
-    const branchName = `${data.team_name}_${data.leader_name}_AI_Fix`
-        .toUpperCase()
-        .replace(/ /g, '_');
+    // Use dynamic branch name returned by the agent
+    const branchName = data.branch_name || "main";
 
     // Determine Pass/Fail Status
     // If it's completed and no errors remain, it passed.
