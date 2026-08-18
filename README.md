@@ -103,7 +103,9 @@ stateDiagram-v2
 
 - **Autonomous Closed-Loop Healing**: Iteratively detects failures, generates targeted source patches, applies them to disk, and re-executes tests until all checks pass.
 - **Priority-Based Failure Resolution**: Automatically prioritizes critical blocking errors first:
-  $$\text{SYNTAX} \longrightarrow \text{INDENTATION} \longrightarrow \text{IMPORT} \longrightarrow \text{TYPE\_ERROR} \longrightarrow \text{LOGIC} \longrightarrow \text{LINTING}$$
+  $$
+\text{SYNTAX} \longrightarrow \text{INDENTATION} \longrightarrow \text{IMPORT} \longrightarrow \text{TYPE\_ERROR} \longrightarrow \text{LOGIC} \longrightarrow \text{LINTING}
+$$
 - **Sandboxed Container Verification**: All linter scans (`pylint`) and unit tests (`pytest`) execute inside isolated, non-root Docker containers—preventing unsafe code execution on host machines.
 - **Dual Execution Git Model**:
   - **Authenticated Mode**: If a `GITHUB_TOKEN` is supplied, fixes are pushed directly to a dedicated remote branch on GitHub.
