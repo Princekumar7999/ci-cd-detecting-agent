@@ -54,7 +54,7 @@ def run_agent_task(run_id: str, request: RepoRequest):
         shutil.rmtree(workspace_dir)
     os.makedirs(workspace_dir, exist_ok=True)
     
-    start_time = datetime.datetime.now().isoformat()
+    start_time = results_store[run_id]["start_time"]
     
     # Initialize state
     state: AgentState = {
@@ -234,16 +234,21 @@ def run_agent_task(run_id: str, request: RepoRequest):
 @app.post("/analyze")
 def analyze_repo(request: RepoRequest, background_tasks: BackgroundTasks):
     run_id = str(uuid.uuid4())
-    # Initialize placeholder
-    results_store[run_id] = {"status": "pending", "request": request.dict()}
+
+    results_store[run_id] = {
+        "status": "pending",
+        "request": request.dict(),
+        "start_time": datetime.datetime.now().isoformat(),
+        "end_time": "",
+        "iteration": 0,
+        "lint_errors": [],
+        "test_failures": [],
+        "fixed_issues": [],
+        "iterations_log": [],
+    }
+
     background_tasks.add_task(run_agent_task, run_id, request)
     return {"run_id": run_id, "status": "started"}
-
-@app.get("/results/{run_id}")
-def get_results(run_id: str):
-    if run_id not in results_store:
-        raise HTTPException(status_code=404, detail="Run ID not found")
-    return results_store[run_id]
 
 @app.get("/status")
 def health_check():
